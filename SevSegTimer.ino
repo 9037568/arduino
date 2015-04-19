@@ -11,7 +11,6 @@ unsigned long lastCheck;
 void setup()
 {
   Serial.begin(9600);
-  Serial.setTimeout(0);
   runTime = 0;
   lc.shutdown(0, false);
   lc.setIntensity(0,15);
@@ -45,12 +44,14 @@ void loop()
     Serial.print("Counter: ");
     Serial.println(counter);
     display(counter);
-    String command = Serial.readString();
-    if( command == "hide" ) {
-      lc.shutdown(0, true);
-    }
-    else if( command == "show" ) {
-      lc.shutdown(0, false);
+    if( Serial.available() > 0 ) {
+      String command = Serial.readString();
+      if( command == "hide" ) {
+        lc.shutdown(0, true);
+      }
+      else if( command == "show" ) {
+        lc.shutdown(0, false);
+      }
     }
   }
 }
