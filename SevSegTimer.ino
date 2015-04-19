@@ -6,6 +6,7 @@
 LedControl lc=LedControl(5,3,4,1);
 unsigned long runTime;
 unsigned long counter;
+unsigned long lastCheck;
 
 void setup()
 {
@@ -35,19 +36,22 @@ void display(unsigned long count)
 
 void loop()
 {
-  delay(1000);
-  counter++;
-  Serial.print("Time: ");
-  Serial.println(millis());
-  Serial.print("Counter: ");
-  Serial.println(counter);
-  display(counter);
-  String command = Serial.readString();
-  if( command == "hide" ) {
-    lc.shutdown(0, true);
-  }
-  else if( command == "show" ) {
-    lc.shutdown(0, false);
+  unsigned long newCheck = millis();
+  if( newCheck - lastCheck > 999 ) {
+    counter++;
+    lastCheck = newCheck;
+    Serial.print("Time: ");
+    Serial.println(millis());
+    Serial.print("Counter: ");
+    Serial.println(counter);
+    display(counter);
+    String command = Serial.readString();
+    if( command == "hide" ) {
+      lc.shutdown(0, true);
+    }
+    else if( command == "show" ) {
+      lc.shutdown(0, false);
+    }
   }
 }
 
