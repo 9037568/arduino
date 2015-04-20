@@ -4,6 +4,7 @@
 
 /* data,clock,load,numDevices */
 LedControl lc=LedControl(5,3,4,1);
+String state;
 unsigned long runTime;
 unsigned long counter;
 unsigned long lastCheck;
@@ -15,6 +16,7 @@ void setup()
   lc.shutdown(0, false);
   lc.setIntensity(0,15);
   lc.clearDisplay(0);
+  state = "running";
 }
 
 void display(unsigned long count)
@@ -35,22 +37,24 @@ void display(unsigned long count)
 
 void loop()
 {
-  unsigned long newCheck = millis();
-  if( newCheck - lastCheck > 999 ) {
-    counter++;
-    lastCheck = newCheck;
-    Serial.print("Time: ");
-    Serial.println(millis());
-    Serial.print("Counter: ");
-    Serial.println(counter);
-    display(counter);
-    if( Serial.available() > 0 ) {
-      String command = Serial.readString();
-      if( command == "hide" ) {
-        lc.shutdown(0, true);
-      }
-      else if( command == "show" ) {
-        lc.shutdown(0, false);
+  if( state == "running" ) {
+    unsigned long newCheck = millis();
+    if( newCheck - lastCheck > 999 ) {
+      counter++;
+      lastCheck = newCheck;
+      Serial.print("Time: ");
+      Serial.println(millis());
+      Serial.print("Counter: ");
+      Serial.println(counter);
+      display(counter);
+      if( Serial.available() > 0 ) {
+        String command = Serial.readString();
+        if( command == "hide" ) {
+          lc.shutdown(0, true);
+        }
+        else if( command == "show" ) {
+          lc.shutdown(0, false);
+        }
       }
     }
   }
