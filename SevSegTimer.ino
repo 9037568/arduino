@@ -12,6 +12,7 @@ unsigned long lastCheck;
 void setup()
 {
   Serial.begin(9600);
+  pinMode(8, INPUT_PULLUP);
   runTime = 0;
   lc.shutdown(0, false);
   lc.setIntensity(0,15);
@@ -37,25 +38,43 @@ void display(unsigned long count)
 
 void loop()
 {
+  unsigned long newCheck = millis();
+  int latchState;
+  
+  if( newCheck - lastCheck > 999 ) {
+    latchState = digitalRead(8);
+    if( latchState == HIGH ) { //door is open
+      state = "stopped";
+    }
+    else { //door is closed
+      state = "running";
+    }
+    
+    if( Serial.available() > 0 ) {
+      String command = Serial.readString();
+      if( command == "hide" ) {
+        lc.shutdown(0, true);
+      }
+      else if( command == "show" ) {
+        lc.shutdown(0, false);
+      }
+      else if( command == "reset" ) {
+        counter = 0;
+      }
+      else if( command == "stop" ) {
+        state = "stopped";
+      }
+      else if( command == "start" ) {
+        state = "running";
+      }
+    }
+  }
+
   if( state == "running" ) {
-    unsigned long newCheck = millis();
     if( newCheck - lastCheck > 999 ) {
       counter++;
       lastCheck = newCheck;
-      Serial.print("Time: ");
-      Serial.println(millis());
-      Serial.print("Counter: ");
-      Serial.println(counter);
       display(counter);
-      if( Serial.available() > 0 ) {
-        String command = Serial.readString();
-        if( command == "hide" ) {
-          lc.shutdown(0, true);
-        }
-        else if( command == "show" ) {
-          lc.shutdown(0, false);
-        }
-      }
     }
   }
 }
